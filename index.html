@@ -38,8 +38,21 @@
             font-size: 32px;
         }
         
-        #power-bar {
-            background: linear-gradient(90deg, #138808, #FFFFFF, #FF9933) !important;
+        #restart-btn {
+            font-family: 'Tiro Devanagari Hindi', serif;
+            background: linear-gradient(135deg, #FF9933, #FF4500);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+            transition: transform 0.1s;
+        }
+        #restart-btn:active {
+            transform: scale(0.95);
         }
     </style>
     <div id="ui">
@@ -49,6 +62,7 @@
             <div id="power-bar"></div>
         </div>
         <div id="score">लॉन्च के लिए तैयार...</div>
+        <button id="restart-btn">पुनः आरंभ करें (Restart)</button>
     </div>
     <div id="error-overlay" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(255,0,0,0.8); color:white; padding:20px; border-radius:10px; z-index:9999; font-family:monospace; max-width:80%;"></div>
     <script>

@@ -324,9 +324,15 @@ let isCharging = false;
 let power = 0;
 let gameState = 'ready'; 
 let hasExploded = false;
+let resetTimeout = null;
 
 const uiPowerBar = document.getElementById('power-bar');
 const uiScore = document.getElementById('score');
+const uiRestartBtn = document.getElementById('restart-btn');
+
+uiRestartBtn.addEventListener('click', () => {
+    resetGame();
+});
 
 window.addEventListener('keydown', (e) => {
     if (e.code === 'Space' && gameState === 'ready') {
@@ -462,9 +468,11 @@ function animate(time) {
 
         const isStopped = tireBody.velocity.length() < 1.5 && tireBody.position.y < tireRadius * 2;
         if ((isStopped && flyingTimer > 4) || flyingTimer > 15) {
-            gameState = 'ended';
-            uiScore.innerText = "विनाश पूरा हुआ! रीसेट कर रहा है... ॐ"; 
-            setTimeout(() => { resetGame(); }, 4000);
+            if (gameState !== 'ended') {
+                gameState = 'ended';
+                uiScore.innerText = "विनाश पूरा हुआ! रीसेट कर रहा है... ॐ"; 
+                resetTimeout = setTimeout(() => { resetGame(); }, 4000);
+            }
         }
     }
 
@@ -479,6 +487,8 @@ window.addEventListener('resize', () => {
 });
 
 function resetGame() {
+    if (resetTimeout) clearTimeout(resetTimeout);
+    resetTimeout = null;
     gameState = 'ready'; power = 0; flyingTimer = 0; chargeTime = 0; hasExploded = false;
     uiScore.innerText = "लॉन्च के लिए तैयार... ॐ";
     // Clear particles
