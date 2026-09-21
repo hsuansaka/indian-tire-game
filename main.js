@@ -160,26 +160,61 @@ armGroupL.rotation.x = 1.0; armGroupL.rotation.z = -0.2;
 armGroupR.rotation.x = 1.0; armGroupR.rotation.z = 0.2;
 scene.add(manGroup);
 
-// --- The Twin Towers (Solid Meshes instead of blocks) ---
-const towerZ = 200;
-const towerMeshes = [];
-const solidTowerMat = new THREE.MeshStandardMaterial({ color: 0x99aacc, map: towerTex, roughness: 0.1, metalness: 0.9, envMapIntensity: 2.0 });
+// --- The Twin Towers (Indian Flag Colors - Physics Blocks) ---
+const towerZ = 200; 
+const towerBlocks = [];
+const saffronMat = new THREE.MeshStandardMaterial({ color: 0xFF9933, map: towerTex, roughness: 0.1, metalness: 0.9, envMapIntensity: 1.5 });
+const whiteMat = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, map: towerTex, roughness: 0.1, metalness: 0.9, envMapIntensity: 1.5 });
+const greenMat = new THREE.MeshStandardMaterial({ color: 0x138808, map: towerTex, roughness: 0.1, metalness: 0.9, envMapIntensity: 1.5 });
 
 function buildTwinTowers() {
-    towerMeshes.forEach(m => scene.remove(m));
-    towerMeshes.length = 0;
-    const geo = new THREE.BoxGeometry(8, 60, 8);
-    
-    const towerL = new THREE.Mesh(geo, solidTowerMat);
-    towerL.position.set(-5, 30, towerZ);
-    towerL.castShadow = true; towerL.receiveShadow = true;
-    
-    const towerR = new THREE.Mesh(geo, solidTowerMat);
-    towerR.position.set(5, 30, towerZ);
-    towerR.castShadow = true; towerR.receiveShadow = true;
-    
-    scene.add(towerL); scene.add(towerR);
-    towerMeshes.push(towerL, towerR);
+    // Clear old blocks
+    for(const block of towerBlocks) {
+        world.removeBody(block.body);
+        scene.remove(block.mesh);
+    }
+    towerBlocks.length = 0;
+
+    const floors = 25;
+    const towerW = 6;
+    const towerD = 6;
+    const floorH = 2.0;
+
+    function buildSingleTower(offsetX) {
+        for (let i = 0; i < floors; i++) {
+            const y = i * floorH + floorH / 2;
+            const bW = towerW / 2;
+            const bD = towerD / 2;
+            
+            let mat = whiteMat;
+            if (i >= 16) mat = saffronMat; 
+            else if (i < 8) mat = greenMat; 
+            
+            for(let x=0; x<2; x++) {
+                for(let z=0; z<2; z++) {
+                    const posX = offsetX - (towerW/4) + (x * bW);
+                    const posZ = towerZ - (towerD/4) + (z * bD);
+
+                    const mesh = new THREE.Mesh(new THREE.BoxGeometry(bW-0.05, floorH-0.05, bD-0.05), mat);
+                    mesh.castShadow = true; mesh.receiveShadow = true;
+                    scene.add(mesh);
+
+                    const shape = new CANNON.Box(new CANNON.Vec3((bW-0.05)/2, (floorH-0.05)/2, (bD-0.05)/2));
+                    const body = new CANNON.Body({
+                        mass: 5, 
+                        material: physicsMaterial,
+                        position: new CANNON.Vec3(posX, y, posZ)
+                    });
+                    body.addShape(shape);
+                    body.sleep(); 
+                    world.addBody(body);
+                    towerBlocks.push({ mesh, body });
+                }
+            }
+        }
+    }
+    buildSingleTower(-3.5); 
+    buildSingleTower(3.5);  
 }
 buildTwinTowers();
 
@@ -244,9 +279,7 @@ const explosionSystem = new THREE.Points(explGeo, new THREE.PointsMaterial({
 scene.add(explosionSystem);
 
 function triggerExplosion() {
-    towerMeshes.forEach(m => m.visible = false); // Hide towers!
-    
-    // Create massive explosion
+    // Create massive explosion without hiding the physics blocks!
     const posAttr = explGeo.attributes.position;
     for (let i = 0; i < explosionCount; i++) {
         // Start in the center of the towers
@@ -384,6 +417,12 @@ function animate(time) {
         manGroup.position.z = 0;
     }
 
+    // Sync tower blocks physics
+    for(const block of towerBlocks) {
+        block.mesh.position.copy(block.body.position);
+        block.mesh.quaternion.copy(block.body.quaternion);
+    }
+
     // Cinematic Camera
     let camShakeX = 0, camShakeY = 0;
     if (explosionShakeTime > 0) {
@@ -442,9 +481,10 @@ window.addEventListener('resize', () => {
 function resetGame() {
     gameState = 'ready'; power = 0; flyingTimer = 0; chargeTime = 0; hasExploded = false;
     uiScore.innerText = "लॉन्च के लिए तैयार... ॐ";
-    towerMeshes.forEach(m => m.visible = true);
     // Clear particles
     for (let i = 0; i < explosionCount; i++) explLife[i] = 0;
+    // Rebuild physics towers
+    buildTwinTowers();
 }
 
 animate(performance.now());
