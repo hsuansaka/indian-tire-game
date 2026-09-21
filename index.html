@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>印度飛輪胎：爆射高塔</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Import maps polyfill -->
+    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+          "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js"
+        }
+      }
+    </script>
+</head>
+<body>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi&display=swap');
+        
+        #ui h1 {
+            font-family: 'Tiro Devanagari Hindi', serif;
+            color: #FF9933; /* Saffron */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8), -1px -1px 0 #FFFFFF, 1px 1px 0 #138808;
+            font-size: 56px;
+        }
+        
+        #ui p {
+            font-family: 'Tiro Devanagari Hindi', serif;
+            font-size: 24px;
+        }
+
+        #score {
+            font-family: 'Tiro Devanagari Hindi', serif;
+            font-size: 32px;
+        }
+        
+        #power-bar {
+            background: linear-gradient(90deg, #138808, #FFFFFF, #FF9933) !important;
+        }
+    </style>
+    <div id="ui">
+        <h1>🇮🇳 भारतीय फ्लाइंग टायर ॐ</h1>
+        <p>टायर घुमाने के लिए <kbd>SPACE</kbd> दबाए रखें, लॉन्च करने के लिए छोड़ें!</p>
+        <div id="power-bar-container">
+            <div id="power-bar"></div>
+        </div>
+        <div id="score">लॉन्च के लिए तैयार...</div>
+    </div>
+    <div id="error-overlay" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(255,0,0,0.8); color:white; padding:20px; border-radius:10px; z-index:9999; font-family:monospace; max-width:80%;"></div>
+    <script>
+        window.addEventListener('error', function(e) {
+            document.getElementById('error-overlay').style.display = 'block';
+            document.getElementById('error-overlay').innerHTML += e.message + '<br>' + e.filename + ':' + e.lineno + '<br><br>';
+        });
+    </script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>
